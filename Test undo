@@ -1,4 +1,4 @@
--- ═══════════ UNODOCALL'S HUB — FINAL v4 ═══════════
+-- ═══════════ UNODOCALL'S HUB — FINAL v5 (BULL TRIAL MERGED) ═══════════
 -- Arena: (-760, 11.5, 2040)
 
 local StarterGui = game:GetService("StarterGui")
@@ -8,6 +8,8 @@ local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
 local Lighting = game:GetService("Lighting")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CollectionService = game:GetService("CollectionService")
 
 local lp = Players.LocalPlayer
 while not lp do task.wait() lp = Players.LocalPlayer end
@@ -546,7 +548,7 @@ local hC = Instance.new("UICorner"); hC.CornerRadius = UDim.new(0, 12); hC.Paren
 
 local hTitle = Instance.new("TextLabel")
 hTitle.Size = UDim2.new(0, 300, 1, 0); hTitle.Position = UDim2.new(0, 14, 0, 0)
-hTitle.BackgroundTransparency = 1; hTitle.Text = "Undocall's Hub (v4)"
+hTitle.BackgroundTransparency = 1; hTitle.Text = "Undocall's Hub (v5)"
 hTitle.TextColor3 = COL.text; hTitle.Font = Enum.Font.GothamBold; hTitle.TextSize = 16; hTitle.TextXAlignment = Enum.TextXAlignment.Left; hTitle.Parent = header
 
 local closeBtn = Instance.new("TextButton")
@@ -907,9 +909,10 @@ local miscPage = addPage("Misc")
 addButtonRow(miscPage, "AntiLag (Potato Graphics)", function() applyPotatoGraphics() end)
 addButtonRow(miscPage, "AntiKick", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/OBFhm5650lol/AntickLol/refs/heads/main/Anticklol"))() end)
 
--- ═══════════ SURPRISE CATEGORY (FREE JESTER CLAIM) ═══════════
+-- ═══════════ SURPRISE CATEGORY ═══════════
 local surprisePage = addPage("Surprise")
 
+-- FREE JESTER CLAIM
 local claimBtn = Instance.new("TextButton")
 claimBtn.Size = UDim2.new(1, 0, 0, 40)
 claimBtn.BackgroundColor3 = COL.accent
@@ -1005,6 +1008,163 @@ claimBtn.MouseButton1Click:Connect(function()
             claimBtn.BackgroundColor3 = COL.accent
         end
     end)
+end)
+
+-- ═══════════ AUTO BULL TRIAL (v64) ═══════════
+local bullRunning = false
+local bullToggle
+local bullStatus = Instance.new("TextLabel", surprisePage)
+bullStatus.Size = UDim2.new(1, 0, 0, 20)
+bullStatus.BackgroundTransparency = 1
+bullStatus.Text = "Wait 187s, then claim."
+bullStatus.TextColor3 = COL.textDim
+bullStatus.Font = Enum.Font.Gotham
+bullStatus.TextSize = 11
+bullStatus.Parent = surprisePage
+
+bullToggle = addToggleRow(surprisePage, "Auto Bull Trial", function(enabled)
+    if enabled then
+        if bullRunning then return end
+        if not keyVerified then notify("Locked", "Enter key first", 3); bullToggle.set(false); return end
+        bullRunning = true
+        bullStatus.Text = "Starting Trial..."
+        bullStatus.TextColor3 = Color3.fromRGB(200, 150, 0)
+        
+        task.spawn(function()
+            local Event = ReplicatedStorage:WaitForChild("RiderTrial"):WaitForChild("Event")
+            
+            -- YOUR EXACT COORDINATES
+            local SAFE_COORD = Vector3.new(492.5, 594.2, 11342.0)
+            local FINAL_COORD = Vector3.new(527.4, 585.2, 11370.1) -- 🛑 THE BULL COORDINATE
+
+            local char = lp.Character
+            local hrp = char and char:FindFirstChild("HumanoidRootPart")
+            local hum = char and char:FindFirstChildOfClass("Humanoid")
+            
+            if not hrp or not hum then 
+                bullRunning = false 
+                bullToggle.set(false)
+                return 
+            end
+
+            -- Trial Godmode & Noclip
+            local godConnection
+            godConnection = RunService.Stepped:Connect(function()
+                if bullRunning and hum and hum.Parent then
+                    hum.MaxHealth = math.huge
+                    hum.Health = math.huge
+                    for _, part in ipairs(char:GetDescendants()) do
+                        if part:IsA("BasePart") then part.CanCollide = false end
+                    end
+                end
+            end)
+            
+            pcall(function() Event:FireServer("Leave") end)
+            task.wait(1)
+            pcall(function() Event:FireServer("Ride", true) end)
+            
+            local map = nil
+            local t = 0
+            while not map and t < 15 and bullRunning do 
+                map = workspace:FindFirstChild("RiderTrialMap") or ReplicatedStorage:FindFirstChild("RiderTrialMap")
+                task.wait(1); t = t + 1 
+            end
+            
+            if map and hrp and bullRunning then
+                -- Skip Stage 1
+                local rings = CollectionService:GetTagged("ChainAnchor")
+                table.sort(rings, function(a, b) return a.Position.Y > b.Position.Y end)
+                for i, ring in ipairs(rings) do
+                    if not bullRunning then break end
+                    hrp.CFrame = ring.CFrame + Vector3.new(0, 5, 0)
+                    pcall(function() Event:FireServer("Throw", i, ring.Position) end)
+                    task.wait(0.1)
+                end
+
+                -- Skip Stage 2
+                if bullRunning then
+                    local path = map.Stage2.Ride.Path
+                    local points = {}
+                    local p = 0
+                    while path:FindFirstChild("P" .. p) do
+                        table.insert(points, path["P" .. p].Position)
+                        p = p + 1
+                    end
+                    for index, pos in ipairs(points) do
+                        if not bullRunning then break end
+                        hrp.CFrame = CFrame.new(pos + Vector3.new(0, 5, 0))
+                        pcall(function() Event:FireServer("Throw", index, pos) end)
+                        task.wait(0.2)
+                    end
+                    pcall(function() Event:FireServer("Ride", false) end)
+                end
+
+                -- Start Arena
+                if bullRunning then
+                    local stage3 = map.Stage3
+                    local centerPart = stage3 and stage3:FindFirstChildWhichIsA("BasePart")
+                    if centerPart then
+                        hrp.CFrame = centerPart.CFrame + Vector3.new(0, 5, 0)
+                        pcall(function() Event:FireServer("Pit", "Start") end)
+                    end
+                    
+                    task.wait(1) 
+                    hrp.CFrame = CFrame.new(SAFE_COORD)
+                    hrp.AssemblyLinearVelocity = Vector3.zero
+                    
+                    -- Wait 187 seconds
+                    local waitTime = 187
+                    local startTime = os.clock()
+                    
+                    while os.clock() - startTime < waitTime and bullRunning do
+                        local left = waitTime - (os.clock() - startTime)
+                        bullStatus.Text = "Safe Wait: " .. string.format("%.1f", left) .. "s"
+                        if (hrp.Position - SAFE_COORD).Magnitude > 5 then
+                            hrp.CFrame = CFrame.new(SAFE_COORD)
+                            hrp.AssemblyLinearVelocity = Vector3.zero
+                        end
+                        task.wait(1)
+                    end
+                    
+                    if bullRunning then
+                        bullStatus.Text = "Teleporting to bull coord..."
+                        hrp.CFrame = CFrame.new(FINAL_COORD)
+                        hrp.AssemblyLinearVelocity = Vector3.zero
+                        task.wait(3.5)
+                        
+                        bullStatus.Text = "Claiming bull..."
+                        pcall(function() Event:FireServer("Pit", "Win") end)
+                        task.wait(0.5)
+                        
+                        for _, obj in ipairs(game:GetDescendants()) do
+                            if obj.Name == "SkinGiverRemoteEvent" then
+                                pcall(function() obj:FireServer("Gamepass3", true) end)
+                                pcall(function() obj:FireServer("Gamepass3", 1, true) end)
+                            end
+                            if obj.Name == "EquipSkinRemoteFunction" then
+                                pcall(function() obj:InvokeServer("Gamepass3", true) end)
+                                pcall(function() obj:InvokeServer("Gamepass3") end)
+                            end
+                        end
+                        
+                        task.wait(1)
+                        pcall(function() Event:FireServer("Leave") end)
+                        bullStatus.Text = "Done! Check skins."
+                        bullStatus.TextColor3 = COL.green
+                        notify("Bull Trial", "Auto Bull Trial Finished", 5)
+                    end
+                end
+            end
+            
+            if godConnection then godConnection:Disconnect() end
+            bullRunning = false
+            bullToggle.set(false) -- Force toggle off
+        end)
+    else
+        bullRunning = false
+        bullStatus.Text = "Cancelled."
+        bullStatus.TextColor3 = COL.red
+    end
 end)
 
 pages["Main"].Visible = true
@@ -1289,5 +1449,5 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
-print("Undocall's Hub v4 loaded.")
+print("Undocall's Hub v5 (Bull Merged) loaded.")
 print("Discord: " .. KEY_LINK)
