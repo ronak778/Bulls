@@ -1,4 +1,4 @@
--- ═══════════ UNODOCALL'S HUB — FINAL v5 (BULL TRIAL MERGED) ═══════════
+-- ═══════════ UNODOCALL'S HUB — FINAL v6 (SKULLYBLAZE FIXED) ═══════════
 -- Arena: (-760, 11.5, 2040)
 
 local StarterGui = game:GetService("StarterGui")
@@ -548,7 +548,7 @@ local hC = Instance.new("UICorner"); hC.CornerRadius = UDim.new(0, 12); hC.Paren
 
 local hTitle = Instance.new("TextLabel")
 hTitle.Size = UDim2.new(0, 300, 1, 0); hTitle.Position = UDim2.new(0, 14, 0, 0)
-hTitle.BackgroundTransparency = 1; hTitle.Text = "Undocall's Hub (v5)"
+hTitle.BackgroundTransparency = 1; hTitle.Text = "Undocall's Hub (v6)"
 hTitle.TextColor3 = COL.text; hTitle.Font = Enum.Font.GothamBold; hTitle.TextSize = 16; hTitle.TextXAlignment = Enum.TextXAlignment.Left; hTitle.Parent = header
 
 local closeBtn = Instance.new("TextButton")
@@ -927,13 +927,14 @@ cbS.Color = COL.border
 cbS.Parent = claimBtn
 
 local statusLbl = Instance.new("TextLabel", surprisePage)
-statusLbl.Size = UDim2.new(1, 0, 0, 40)
+statusLbl.Size = UDim2.new(1, 0, 0, 20)
 statusLbl.BackgroundTransparency = 1
-statusLbl.Text = "Must be inside maze to claim."
+statusLbl.Text = ""
 statusLbl.TextColor3 = COL.textDim
 statusLbl.Font = Enum.Font.Gotham
 statusLbl.TextSize = 12
 statusLbl.TextWrapped = true
+statusLbl.Visible = false -- Hidden by default
 statusLbl.Parent = surprisePage
 
 claimBtn.MouseButton1Click:Connect(function()
@@ -943,11 +944,14 @@ claimBtn.MouseButton1Click:Connect(function()
 
     -- 🛑 Check if inside the maze
     if hrp.Position.Z > -1000 then
+        statusLbl.Visible = true
         statusLbl.Text = "❌ You must be inside the maze!"
         statusLbl.TextColor3 = COL.red
+        task.delay(3, function() statusLbl.Visible = false end) -- hide after 3 seconds
         return
     end
 
+    statusLbl.Visible = true
     claimBtn.Text = "CLAIMING..."
     claimBtn.BackgroundColor3 = Color3.fromRGB(200, 150, 0)
     statusLbl.Text = "Teleporting to exit..."
@@ -1001,32 +1005,36 @@ claimBtn.MouseButton1Click:Connect(function()
             claimBtn.Text = "FREE JESTER CLAIM"
             claimBtn.BackgroundColor3 = COL.accent
             notify("Surprise", "Claim sequence finished.", 4)
+            task.delay(4, function() statusLbl.Visible = false end)
         else
             statusLbl.Text = "❌ Error: " .. tostring(err)
             statusLbl.TextColor3 = COL.red
             claimBtn.Text = "FREE JESTER CLAIM"
             claimBtn.BackgroundColor3 = COL.accent
+            task.delay(4, function() statusLbl.Visible = false end)
         end
     end)
 end)
 
--- ═══════════ AUTO BULL TRIAL (v64) ═══════════
+-- ═══════════ AUTO CLAIM SKULLYBLAZE (NO DRIFT) ═══════════
 local bullRunning = false
 local bullToggle
 local bullStatus = Instance.new("TextLabel", surprisePage)
 bullStatus.Size = UDim2.new(1, 0, 0, 20)
 bullStatus.BackgroundTransparency = 1
-bullStatus.Text = "Wait 187s, then claim."
+bullStatus.Text = ""
 bullStatus.TextColor3 = COL.textDim
 bullStatus.Font = Enum.Font.Gotham
 bullStatus.TextSize = 11
+bullStatus.Visible = false -- Hidden by default
 bullStatus.Parent = surprisePage
 
-bullToggle = addToggleRow(surprisePage, "Auto Bull Trial", function(enabled)
+bullToggle = addToggleRow(surprisePage, "Auto Claim Skullyblaze", function(enabled)
     if enabled then
         if bullRunning then return end
         if not keyVerified then notify("Locked", "Enter key first", 3); bullToggle.set(false); return end
         bullRunning = true
+        bullStatus.Visible = true
         bullStatus.Text = "Starting Trial..."
         bullStatus.TextColor3 = Color3.fromRGB(200, 150, 0)
         
@@ -1112,18 +1120,26 @@ bullToggle = addToggleRow(surprisePage, "Auto Bull Trial", function(enabled)
                     hrp.CFrame = CFrame.new(SAFE_COORD)
                     hrp.AssemblyLinearVelocity = Vector3.zero
                     
-                    -- Wait 187 seconds
+                    -- 🛑 NO DRIFT TIMER FIX
                     local waitTime = 187
                     local startTime = os.clock()
                     
-                    while os.clock() - startTime < waitTime and bullRunning do
-                        local left = waitTime - (os.clock() - startTime)
-                        bullStatus.Text = "Safe Wait: " .. string.format("%.1f", left) .. "s"
+                    while bullRunning do
+                        local elapsed = os.clock() - startTime
+                        local remaining = waitTime - elapsed
+                        
+                        if remaining <= 0 then
+                            break
+                        end
+                        
+                        bullStatus.Text = "Safe Wait: " .. string.format("%.1f", remaining) .. "s"
+                        
                         if (hrp.Position - SAFE_COORD).Magnitude > 5 then
                             hrp.CFrame = CFrame.new(SAFE_COORD)
                             hrp.AssemblyLinearVelocity = Vector3.zero
                         end
-                        task.wait(1)
+                        
+                        task.wait(0.1) 
                     end
                     
                     if bullRunning then
@@ -1151,7 +1167,8 @@ bullToggle = addToggleRow(surprisePage, "Auto Bull Trial", function(enabled)
                         pcall(function() Event:FireServer("Leave") end)
                         bullStatus.Text = "Done! Check skins."
                         bullStatus.TextColor3 = COL.green
-                        notify("Bull Trial", "Auto Bull Trial Finished", 5)
+                        notify("Bull Trial", "Auto Claim Skullyblaze Finished", 5)
+                        task.delay(4, function() bullStatus.Visible = false end)
                     end
                 end
             end
@@ -1164,6 +1181,7 @@ bullToggle = addToggleRow(surprisePage, "Auto Bull Trial", function(enabled)
         bullRunning = false
         bullStatus.Text = "Cancelled."
         bullStatus.TextColor3 = COL.red
+        task.delay(2, function() bullStatus.Visible = false end)
     end
 end)
 
@@ -1449,5 +1467,5 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
-print("Undocall's Hub v5 (Bull Merged) loaded.")
+print("Undocall's Hub v6 loaded.")
 print("Discord: " .. KEY_LINK)
